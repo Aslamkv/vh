@@ -9,4 +9,10 @@ Automated Apache2 VirtualHost Configuration on Ubuntu
 PS: You dont need the files listed here once you have installed vh, you can delete them :stuck_out_tongue:
 
 ### Screenshots
-![Adding a virtualhost using vh](https://raw.githubusercontent.com/Aslamkv/vh/master/success.png)
+|![Adding a virtualhost using vh](https://raw.githubusercontent.com/Aslamkv/vh/master/success.png)|
+|:--:| 
+| *Adding a virtualhost using vh* |
+
+|![Removing a virtualhost using vhu](https://raw.githubusercontent.com/Aslamkv/vh/master/vhu.png)|
+|:--:| 
+| *Removing a virtualhost using vhu* |
