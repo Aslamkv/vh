@@ -4,8 +4,16 @@ path="$(pwd)"
 echo "Creating VirtualHost for $user"
 echo "Enter website name"
 read site
-echo "Enter local IP"
-read ip
+
+while :
+do
+  ip="127.$(($RANDOM % 255)).$(($RANDOM % 255)).$(($RANDOM % 255))"
+  if ! grep -Fq $ip /etc/hosts; then
+    break;
+  fi
+done
+echo "Binding $site with generated ip $ip"
+
 sudo cp /usr/bin/template.conf $path/$site.conf
 sudo sed -i -e "s/\$template/$site/g" $path/$site.conf
 echo "LocalPath /var/www/html/$site/"
