@@ -21,7 +21,7 @@ sudo mv $path/$site.conf /etc/apache2/sites-available/
 if [ ! -d "/var/www/html/$site" ]; then
   sudo mkdir /var/www/html/$site
 fi
-sudo chown -R $user:$user /var/www/html/$site
+sudo chown -R $user:www-data /var/www/html/$site
 sudo chmod -R 775 /var/www/html/$site
 sudo a2ensite $site.conf
 sudo sed -i -e "s/^.*www\.$site\.com.*$//g" /etc/hosts
