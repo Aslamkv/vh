@@ -10,7 +10,12 @@ echo "----------------------------------"
 echo "Enter website name"
 read site
 
-echo "Removing Apache config fot $site.conf"
+if [[ $a != *"waves.com "* ]]; then
+  echo -e "\n$site is not installed using vh :("
+  exit
+fi
+
+echo "Removing Apache config for $site.conf"
 sudo a2dissite $site.conf
 sudo rm -f /etc/apache2/sites-available/$site.conf
 
