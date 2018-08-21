@@ -24,8 +24,8 @@ fi
 sudo chown -R $user:www-data /var/www/html/$site
 sudo chmod -R 775 /var/www/html/$site
 sudo a2ensite $site.conf
-sudo sed -i -e "s/^.*www\.$site\.com.*$//g" /etc/hosts
-sudo sh -c "echo \"$ip $site.com www.$site.com\" >> /etc/hosts"
+sudo sed -i -e "s/^.*www\.$site.*$//g" /etc/hosts
+sudo sh -c "echo \"$ip $site www.$site\" >> /etc/hosts"
 sudo service apache2 restart
 if [ $? -eq 0 ]; then
   echo "Successfully configured VirtualHost $site with local ip $ip"
@@ -36,7 +36,7 @@ if [ $? -eq 0 ]; then
   fi
   if [ -x "$(command -v firefox)" ]; then
     echo "Launching firefox with $site"
-    firefox -private -url "$site.com"
+    firefox -private -url "$site"
   fi
 else
   echo "VirtualHost configuration failed!"

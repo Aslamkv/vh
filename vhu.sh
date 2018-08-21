@@ -1,7 +1,12 @@
 #!/bin/bash
 user="$(whoami)"
 path="$(pwd)"
+sites=`cat /etc/hosts | grep www.* | sed 's/^[0-9\.\ \t]*//' | sed 's/www\..*$//'`
 echo "Uninstalling VirtualHost for $user"
+echo "---------sites--installed---------"
+echo -e "$sites"
+echo "----------------------------------"
+
 echo "Enter website name"
 read site
 
@@ -15,7 +20,7 @@ if [ -d "/var/www/html/$site" ]; then
 fi
 
 echo "Removing $site from /etc/hosts"
-sudo sed -i -e "s/^.*www\.$site\.com.*$//g" /etc/hosts
+sudo sed -i -e "s/^.*www\.$site.*$//g" /etc/hosts
 sudo service apache2 restart
 
 if [ $? -eq 0 ]; then
