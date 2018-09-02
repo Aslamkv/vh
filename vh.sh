@@ -1,43 +1,119 @@
 #!/bin/bash
-user="$(whoami)"
-path="$(pwd)"
-echo "Creating VirtualHost for $user"
-echo "Enter website name"
-read site
+create (){
+  user="$(whoami)"
+  path="$(pwd)"
+  site=$1
 
-while :
-do
-  ip="127.$(($RANDOM % 255)).$(($RANDOM % 255)).$(($RANDOM % 255))"
-  if ! grep -Fq $ip /etc/hosts; then
-    break;
-  fi
-done
-echo "Binding $site with generated ip $ip"
+  echo "Creating VirtualHost $site for $user"
 
-sudo cp /usr/bin/template.conf $path/$site.conf
-sudo sed -i -e "s/\$template/$site/g" $path/$site.conf
-echo "LocalPath /var/www/html/$site/"
-sudo mv $path/$site.conf /etc/apache2/sites-available/
-if [ ! -d "/var/www/html/$site" ]; then
-  sudo mkdir /var/www/html/$site
-fi
-sudo chown -R $user:www-data /var/www/html/$site
-sudo chmod -R 775 /var/www/html/$site
-sudo a2ensite $site.conf
-sudo sed -i -e "s/^.*www\.$site.*$//g" /etc/hosts
-sudo sh -c "echo \"$ip $site www.$site\" >> /etc/hosts"
-sudo service apache2 restart
-if [ $? -eq 0 ]; then
-  echo "Successfully configured VirtualHost $site with local ip $ip"
-  nautilus "/var/www/html/$site/"
-  if [ -x "$(command -v atom)" ]; then
-    echo "Launching atom with $site"
-    atom "/var/www/html/$site/"
+  if [ -d "/var/www/html/$site" ] || [ -f "etc/apache2/sites-available/$site.conf" ]; then
+    read -p "Do you want to replace exisiting site $site? " -n 1 -r
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+      echo "Creation cancelled"
+      exit;
+    fi
   fi
-  if [ -x "$(command -v firefox)" ]; then
-    echo "Launching firefox with $site"
-    firefox -private -url "$site"
+
+  while :
+  do
+    ip="127.$(($RANDOM % 255)).$(($RANDOM % 255)).$(($RANDOM % 255))"
+    if ! grep -Fq $ip /etc/hosts; then
+      break;
+    fi
+  done
+  echo "Binding $site with generated ip $ip"
+
+  sudo cp /usr/bin/template.conf $path/$site.conf
+  sudo sed -i -e "s/\$template/$site/g" $path/$site.conf
+  echo "LocalPath /var/www/html/$site/"
+  sudo mv $path/$site.conf /etc/apache2/sites-available/
+  if [ ! -d "/var/www/html/$site" ]; then
+    sudo mkdir /var/www/html/$site
   fi
-else
-  echo "VirtualHost configuration failed!"
+  sudo chown -R $user:www-data /var/www/html/$site
+  sudo chmod -R 775 /var/www/html/$site
+  sudo a2ensite $site.conf
+  sudo sed -i -e "s/^.*www\.$site.*$//g" /etc/hosts
+  sudo sh -c "echo \"$ip $site www.$site\" >> /etc/hosts"
+  sudo service apache2 restart
+  if [ $? -eq 0 ]; then
+    echo "Successfully configured VirtualHost $site with local ip $ip"
+    nautilus "/var/www/html/$site/"
+    if [ -x "$(command -v atom)" ]; then
+      echo "Launching atom with $site"
+      atom "/var/www/html/$site/"
+    fi
+    if [ -x "$(command -v firefox)" ]; then
+      echo "Launching firefox with $site"
+      firefox -private -url "$site"
+    fi
+  else
+    echo "VirtualHost configuration failed!"
+  fi
+}
+
+remove (){
+  user="$(whoami)"
+  path="$(pwd)"
+  sites=`cat /etc/hosts | grep www.* | sed 's/^[0-9\.\ \t]*//' | sed 's/www\..*$//'`
+  if [ ${#sites} -lt 1 ]; then
+    echo "No websites found"
+    exit;
+  fi
+
+  echo "Installed websites"
+  echo -e "$sites"
+  echo ""
+
+  echo "Uninstalling VirtualHost for $user"
+  echo "Enter website name"
+  read site
+
+  if [ ${#site} -lt 1 ]; then
+    echo "Website name cannot be empty!"
+    exit;
+  fi
+
+  if [ ! -f /etc/apache2/sites-available/$site.conf ] || [ ! -d /var/www/html/$site ]; then
+    echo -e "\n$site is not installed using vh :("
+    exit
+  fi
+
+  echo "Removing Apache config for $site.conf"
+  sudo a2dissite $site.conf
+  sudo rm -f /etc/apache2/sites-available/$site.conf
+
+  if [ -d "/var/www/html/$site" ]; then
+    read -p "Do you want to remove LocalPath /var/www/html/$site? " -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      echo "Removing LocalPath /var/www/html/$site/"
+      sudo rm -r /var/www/html/$site
+    fi
+  fi
+
+  echo "Removing $site from /etc/hosts"
+  sudo sed -i -e "s/^.*www\.$site.*$//g" /etc/hosts
+  sudo service apache2 restart
+
+  if [ $? -eq 0 ]; then
+    echo "Successfully uninstalled VirtualHost $site"
+  else
+    echo "Uninstalling VirtualHost $site failed!"
+  fi
+}
+
+if [ "$1" == "create" ]; then
+  site=$2
+  if [ ${#site} -lt 1 ]; then
+    echo "Website name cannot be empty!"
+    exit;
+  fi
+  create $site
 fi
+if [ "$1" == "remove" ]; then
+  remove
+fi
+
+echo "Usage"
+echo "Create: vh create <website_name>"
+echo "Remove: vh remove"
