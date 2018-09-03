@@ -7,7 +7,8 @@ create (){
   echo "Creating VirtualHost $site for $user"
 
   if [ -d "/var/www/html/$site" ] || [ -f "etc/apache2/sites-available/$site.conf" ]; then
-    read -p "Do you want to replace exisiting site $site? " -n 1 -r
+    read -p "Do you want to replace exisiting site $site? (y/n) " -n 1 -r
+    echo ""
     if [[ $REPLY =~ ^[Nn]$ ]]; then
       echo "Creation cancelled"
       exit;
@@ -34,7 +35,7 @@ create (){
   sudo chmod -R 775 /var/www/html/$site
   sudo a2ensite $site.conf
   sudo sed -i -e "s/^.*www\.$site.*$//g" /etc/hosts
-  sudo sh -c "echo \"$ip $site www.$site\" >> /etc/hosts"
+  sudo sh -c "echo \"$ip $site www.$site\ #vh\" >> /etc/hosts"
   sudo service apache2 restart
   if [ $? -eq 0 ]; then
     echo "Successfully configured VirtualHost $site with local ip $ip"
@@ -56,7 +57,7 @@ create (){
 remove (){
   user="$(whoami)"
   path="$(pwd)"
-  sites=`cat /etc/hosts | grep www.* | sed 's/^[0-9\.\ \t]*//' | sed 's/www\..*$//'`
+  sites=`cat /etc/hosts | grep .*\#vh$ | sed 's/^[0-9\.\ \t]*//' | sed 's/www\..*$//'`
   if [ ${#sites} -lt 1 ]; then
     echo "No websites found"
     exit;
@@ -85,7 +86,8 @@ remove (){
   sudo rm -f /etc/apache2/sites-available/$site.conf
 
   if [ -d "/var/www/html/$site" ]; then
-    read -p "Do you want to remove LocalPath /var/www/html/$site? " -n 1 -r
+    read -p "Do you want to remove LocalPath /var/www/html/$site? (y/n) " -n 1 -r
+    echo ""
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       echo "Removing LocalPath /var/www/html/$site/"
       sudo rm -r /var/www/html/$site
