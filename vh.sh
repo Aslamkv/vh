@@ -47,6 +47,7 @@ create (){
       echo "Launching firefox with $site"
       firefox -private -url "$site"
     fi
+    echo "Successfully configured $site"
   else
     echo "VirtualHost configuration failed!"
   fi
@@ -109,9 +110,11 @@ if [ "$1" == "create" ]; then
     exit;
   fi
   create $site
+  exit;
 fi
 if [ "$1" == "remove" ]; then
   remove
+  exit;
 fi
 
 echo "Usage"
