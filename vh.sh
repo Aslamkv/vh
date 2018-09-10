@@ -1,8 +1,14 @@
 #!/bin/bash
 create (){
   user="$(whoami)"
-  path="$(pwd)"
+  script=`basename "$0"`
+  path=`dirname "$0"`/.$script
   site=$1
+
+  if [ ! -f "$path/template.conf" ]; then
+    echo 'Missing template.conf' $path
+    exit;
+  fi
 
   echo "Creating VirtualHost $site for $user"
 
@@ -24,8 +30,8 @@ create (){
   done
   echo "Binding $site with generated ip $ip"
 
-  sudo cp /usr/bin/template.conf $path/$site.conf
-  sudo sed -i -e "s/\$template/$site/g" $path/$site.conf
+  cp $path/template.conf $path/$site.conf
+  sed -i -e "s/\$template/$site/g" $path/$site.conf
   echo "LocalPath /var/www/html/$site/"
   sudo mv $path/$site.conf /etc/apache2/sites-available/
   if [ ! -d "/var/www/html/$site" ]; then
@@ -35,7 +41,7 @@ create (){
   sudo chmod -R 775 /var/www/html/$site
   sudo a2ensite $site.conf
   sudo sed -i -e "s/^.*www\.$site.*$//g" /etc/hosts
-  sudo sh -c "echo \"$ip $site www.$site\ #vh\" >> /etc/hosts"
+  sudo sh -c "echo \"$ip $site www.$site #vh\" >> /etc/hosts"
   sudo service apache2 restart
   if [ $? -eq 0 ]; then
     if [ ! -z "$GDMSESSION" ]; then
