@@ -38,17 +38,18 @@ create (){
   sudo sh -c "echo \"$ip $site www.$site\ #vh\" >> /etc/hosts"
   sudo service apache2 restart
   if [ $? -eq 0 ]; then
+    if [ ! -z "$GDMSESSION" ]; then
+      nautilus "/var/www/html/$site/"
+      if [ -x "$(command -v atom)" ]; then
+        echo "Launching atom with $site"
+        atom "/var/www/html/$site/"
+      fi
+      if [ -x "$(command -v firefox)" ]; then
+        echo "Launching firefox with $site"
+        firefox -private -url "$site"
+      fi
+    fi
     echo "Successfully configured VirtualHost $site with local ip $ip"
-    nautilus "/var/www/html/$site/"
-    if [ -x "$(command -v atom)" ]; then
-      echo "Launching atom with $site"
-      atom "/var/www/html/$site/"
-    fi
-    if [ -x "$(command -v firefox)" ]; then
-      echo "Launching firefox with $site"
-      firefox -private -url "$site"
-    fi
-    echo "Successfully configured $site"
   else
     echo "VirtualHost configuration failed!"
   fi
