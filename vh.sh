@@ -44,6 +44,7 @@ create (){
   sudo sh -c "echo \"$ip $site www.$site #vh\" >> /etc/hosts"
   sudo service apache2 restart
   if [ $? -eq 0 ]; then
+    echo ''>/var/www/html/$site/index.php
     if [ ! -z "$GDMSESSION" ]; then
       nautilus "/var/www/html/$site/"
       if [ -x "$(command -v atom)" ]; then
