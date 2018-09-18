@@ -12,7 +12,7 @@ create (){
 
   echo "Creating VirtualHost $site for $user"
 
-  if [ -d "/var/www/html/$site" ] || [ -f "etc/apache2/sites-available/$site.conf" ]; then
+  if [ -f "etc/apache2/sites-available/$site.conf" ]; then
     read -p "Do you want to replace exisiting site $site? (y/n) " -n 1 -r
     echo ""
     if [[ $REPLY =~ ^[Nn]$ ]]; then
